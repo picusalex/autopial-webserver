@@ -1,0 +1,14 @@
+input[type=range].custom-slider {
+  -webkit-appearance: none;     /*nécessaire pour Chrome */
+  padding: 0;                   /* nécessaire pour IE */
+  font: inherit;                /* même rendu suivant font document */
+  outline: none;
+  color: #069;                  /* sert pour couleur de référence, via currentColor, pour le curseur */
+  opacity: .8;
+  background: #CCC;             /* sert pour couleur de fond de la zone de déplacement */
+  box-sizing: border-box;       /* même modèle de boîte pour tous */
+  transition: opacity .2s;
+  cursor: pointer;
+  height: 20px;
+}
+

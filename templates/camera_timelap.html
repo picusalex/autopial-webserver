@@ -1,0 +1,115 @@
+{% extends "layout.html" %}
+
+{% block title %}Camera Live{% endblock %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block content %}
+    <section class="wrapper site-min-height">
+        <h3><i class="fa fa-angle-right"></i> Camera Timelap</h3>
+        <div class="row mt">
+            <div class="col-lg-12">
+                <div class="grey-panel pn donut-chart" style="height:560px;">
+                    <div class="grey-header">
+                        Camera
+                        <select id="cameras_select" class="select_input">
+                        </select>
+                        démarre il y a
+                        <select id="startweeks_select" class="select_input">
+                            <option value="1">1 semaine</option>
+                            <option value="2">2 semaines</option>
+                            <option selected value="4">1 mois</option>
+                            <option value="8">2 mois</option>
+                            <option value="12">3 mois</option>
+                            <option value="16">4 mois</option>
+                            <option value="20">5 mois</option>
+                            <option value="24">6 mois</option>
+                        </select>
+                        toutes les
+                        <select id="evryhours_select" class="select_input">
+                            <option value="2">2 heures</option>
+                            <option selected value="4">4 heures</option>
+                            <option value="6">6 heures</option>
+                            <option value="12">12 heures</option>
+                            <option value="24">24 heures</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <img id="picture_view" src="null" style="width:640px"/>
+                        <input type="range" min="0" max="100" value="0" class="custom-slider" id="sliderImage">
+                    </div>
+
+                </div>
+                <!-- /grey-panel -->
+              </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block footer %}
+
+<script type="text/javascript">
+    function populateTimeLap(camera, start_delta_weeks, evry_hours) {
+        if (camera === null) {
+            console.log("ERROR: no camera name provided !");
+            return;
+        }
+
+        var archive_path = "http://rasp-car:5000/archives";
+        var timelap_path = "http://rasp-car:5000/timelap/"+camera+"/"+start_delta_weeks+"/"+evry_hours;
+
+        console.log("Fetching data from: "+timelap_path);
+
+        $( ".select_input" ).change(function() {
+            populateTimeLap($("#cameras_select").val(), $("#startweeks_select").val(), $("#evryhours_select").val());
+        });
+
+        $.getJSON(timelap_path, function(data) {
+            console.log("Call success ! "+data);
+
+            if (data.files.length > 0) {
+                var filelist = data.files;
+
+                $("#sliderImage").attr("max", filelist.length);
+                $("#sliderImage").attr("value", filelist.length);
+                var picture_path = archive_path+"/"+filelist[0];
+                populatePictureView(picture_path);
+
+                $("#sliderImage").on("input change", function( event, ui ) {
+                    var idx = filelist.length - $(this).val();
+                    var picture_path = archive_path+"/"+filelist[idx];
+                    populatePictureView(picture_path);
+
+                });
+            }
+
+        });
+
+    }
+
+    function populatePictureView(picture_path) {
+        $("#picture_view").attr("src", picture_path) ;
+    }
+
+    function populateCamerasSelect() {
+        var archive_path = "http://rasp-car:5000/cameras";
+        $.getJSON(archive_path, function(data) {
+            console.log("Call success ! "+data);
+
+            data.cameras.forEach(function(element) {
+                $("#cameras_select").append("<option value='"+element+"'>"+element+"</option>");
+            });
+
+            populateTimeLap($("#cameras_select").val(), $("#startweeks_select").val(), $("#evryhours_select").val());
+
+
+        });
+    }
+
+    populateCamerasSelect();
+
+</script>
+{% endblock %}

@@ -1,0 +1,291 @@
+{% extends "layout.html" %}
+
+{% block title %}Index{% endblock %}
+
+{% block head %}
+<script src="static/js/gauge.min.js"></script>
+{% endblock %}
+
+{% block content %}
+    <section class="wrapper site-min-height">
+        <h3><i class="fa fa-angle-right"></i> System status</h3>
+        <div class="row mt">
+            <div class="col-lg-4 col-md-6 col-sm-12 mb">
+                <div class="system card">
+                    <div>
+                        <canvas id="bw_rx_gauge_div"></canvas>
+                        <canvas id="bw_tx_gauge_div"></canvas>
+                    </div>
+
+                    <div class="system current-value">
+                        <div class="row">
+                            <div class="infos col-sm-6 col-xs-6">
+                                <span class="primary">CONNECTION</span>
+                            </div>
+                            <div class="values col-sm-6 col-xs-6">
+                                <span class="primary_text">
+                                    <span id="internet_ping_span">Internet</span> -
+                                    <span id="pixussi_ping_span">Pixussi</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="infos col-sm-6 col-xs-6">
+                                <span class="secondary hidden-sm hidden-xs">Speed</span>
+                            </div>
+                            <div class="values col-sm-6 col-xs-6">
+                                <div class="secondary hidden-sm hidden-xs">
+                                    <span id="rx_speed_span"></span> / <span id="tx_speed_span"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-12 mb">
+                <div class="system card">
+                    <div>
+                        <canvas id="cpu_gauge_div"></canvas>
+                    </div>
+
+                    <div class="system current-value">
+                        <div class="row">
+                            <div class="infos col-sm-4 col-xs-4">
+                                <span class="primary">CPU</span>
+                            </div>
+                            <div class="values col-sm-8 col-xs-8">
+                                <div class="primary" id="cpu_value_span">N/A</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="infos col-sm-4 col-xs-4">
+                                <span class="secondary hidden-sm hidden-xs" id="cpu_count_span">vCPU</span>
+                            </div>
+                            <div class="values col-sm-89 col-xs-8">
+                                <div class="secondary hidden-sm hidden-xs">
+                                    <span id="cpu_freq_span">MHz</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-12 mb">
+                <div class="system card">
+                    <div>
+                        <canvas id="ram_gauge_div"></canvas>
+                    </div>
+
+                    <div class="system current-value">
+                        <div class="row">
+                            <div class="infos col-sm-3 col-xs-3">
+                                <span class="primary">RAM</span>
+                                <span class="secondary hidden-sm hidden-xs">Used</span>
+                            </div>
+                            <div class="values col-sm-9 col-xs-9">
+                                <div class="primary" id="ram_value_span">N/A</div>
+                                <div class="secondary hidden-sm hidden-xs">
+                                    <span id="ram_used_span"></span> / <span id="ram_total_span"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-12 mb">
+                <div class="system card">
+                    <div>
+                        <canvas id="swap_gauge_div"></canvas>
+                    </div>
+
+                    <div class="system current-value">
+                        <div class="row">
+                            <div class="infos col-sm-3 col-xs-3">
+                                <span class="primary">SWAP</span>
+                                <span class="secondary hidden-sm hidden-xs">Used</span>
+                            </div>
+                            <div class="values col-sm-9 col-xs-9">
+                                <div class="primary" id="swap_value_span">N/A</div>
+                                <div class="secondary hidden-sm hidden-xs">
+                                    <span id="swap_used_span"></span> / <span id="swap_total_span"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block footer %}
+<script type="text/javascript">
+    var cpu_gauge = new RadialGauge({
+        renderTo: 'cpu_gauge_div',
+        width: 150,
+        height: 150,
+        value: 0,
+        minValue: 0,
+        maxValue: 100,
+        majorTicks: [
+            "0",
+            "20",
+            "40",
+            "60",
+            "80",
+            "100"
+        ],
+        highlights: [
+            {"from": 50, "to": 75, "color": "rgba(255,255,0,.15)"},
+            {"from": 75, "to": 100, "color": "rgba(255,30,0,.25)"}
+        ],
+        minorTicks: 10,
+        animationDuration: 1000,
+    }).draw();
+
+    socket.on('autopial/system/cpu', function(message) {
+        console.log("Topic: autopial/system/cpu = " + message.usage);
+        $("#cpu_value_span").text(message.usage+'%');
+        $("#cpu_count_span").text(message.vcpu+" vCPU");
+        $("#cpu_freq_span").text(message.frequency.toFixed(0)+' MHz');
+        cpu_gauge.value = message.usage;
+    })
+
+    var ram_gauge = new RadialGauge({
+        renderTo: 'ram_gauge_div',
+                width: 150,
+        height: 150,
+        value: 0,
+        minValue: 0,
+        maxValue: 100,
+        majorTicks: [
+            "0",
+            "20",
+            "40",
+            "60",
+            "80",
+            "100"
+        ],
+        highlights: [
+            {"from": 50, "to": 75, "color": "rgba(255,255,0,.15)"},
+            {"from": 75, "to": 100, "color": "rgba(255,30,0,.25)"}
+        ],
+        minorTicks: 10,
+        animationDuration: 1000,
+    }).draw();
+
+    socket.on('autopial/system/ram', function(message) {
+        console.log("Topic: autopial/system/ram = " + message.usage);
+        $("#ram_value_span").text(message.usage.toFixed(0)+'%');
+        $("#ram_used_span").text(formatBytes(message.used));
+        $("#ram_total_span").text(formatBytes(message.total));
+        ram_gauge.value = message.usage.toFixed(0);
+    })
+
+    var swap_gauge = new RadialGauge({
+        renderTo: 'swap_gauge_div',
+                width: 150,
+        height: 150,
+        value: 0,
+        minValue: 0,
+        maxValue: 100,
+        majorTicks: [
+            "0",
+            "20",
+            "40",
+            "60",
+            "80",
+            "100"
+        ],
+        highlights: [
+            {"from": 50, "to": 75, "color": "rgba(255,255,0,.15)"},
+            {"from": 75, "to": 100, "color": "rgba(255,30,0,.25)"}
+        ],
+        minorTicks: 10,
+        animationDuration: 1000,
+    }).draw();
+
+    socket.on('autopial/system/swap', function(message) {
+        console.log("Topic: autopial/system/swap = " + message.usage);
+        $("#swap_value_span").text(message.usage.toFixed(0)+'%');
+        $("#swap_used_span").text(formatBytes(message.used));
+        $("#swap_total_span").text(formatBytes(message.total));
+        swap_gauge.value = message.usage.toFixed(0);
+    })
+
+    var bw_rx_gauge = new RadialGauge({
+        renderTo: 'bw_rx_gauge_div',
+        width: 150,
+        height: 150,
+        minValue: 0,
+        maxValue: 10*1024,
+        majorTicks: [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "+10"
+        ],
+        title: "RX",
+        units: "Mbps"
+    }).draw();
+
+    var bw_tx_gauge = new RadialGauge({
+        renderTo: 'bw_tx_gauge_div',
+        width: 150,
+        height: 150,
+        minValue: 0,
+        maxValue: 10*1024,
+        majorTicks: [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "+10"
+        ],
+        title: "TX",
+        units: "Mbps"
+    }).draw();
+
+    socket.on('autopial/system/network/bandwidth', function(message) {
+        console.log("Topic: autopial/system/network/bandwidth = " + message.rx_speed +" / "+message.tx_speed);
+        bw_rx_gauge.value = (message.rx_speed/(1024)).toFixed(2);
+        bw_tx_gauge.value = (message.tx_speed/(1024)).toFixed(2);
+        $("#rx_speed_span").text(formatBps(message.rx_speed));
+        $("#tx_speed_span").text(formatBps(message.tx_speed));
+    });
+
+    socket.on('autopial/system/network/ping/internet', function(message) {
+        console.log("Topic: autopial/network/ping/internet = " + message.value);
+        if (message.value === true) {
+            $("#internet_ping_span").removeClass("down");
+            $("#internet_ping_span").addClass("up");
+        }
+        else {
+            $("#internet_ping_span").addClass("down");
+            $("#internet_ping_span").removeClass("up");
+        }
+    });
+
+    socket.on('autopial/system/network/ping/pixussi', function(message) {
+        console.log("Topic: autopial/network/ping/pixussi = " + message.value);
+        if (message.value === true) {
+            $("#pixussi_ping_span").removeClass("down");
+            $("#pixussi_ping_span").addClass("up");
+        }
+        else {
+            $("#pixussi_ping_span").addClass("down");
+            $("#pixussi_ping_span").removeClass("up");
+        }
+    });
+
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+
+{% block title %}Camera Live{% endblock %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block content %}
+    <section class="wrapper site-min-height">
+        <h3><i class="fa fa-angle-right"></i> Camera Live</h3>
+        <div class="row mt">
+            <div class="col-lg-6">
+                <img src="http://rasp-car:5000/video_feed/0" max-height="400" width="100%" />
+            </div>
+            <div class="col-lg-6">
+                <img src="http://rasp-car:5000/video_feed/1" max-height="400" width="100%" />
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block footer %}
+
+{% endblock %}
