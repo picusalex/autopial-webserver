@@ -32,7 +32,7 @@
 
                         <div class="row">
                             <div class="infos col-sm-6 col-xs-6">
-                                <span class="secondary hidden-sm hidden-xs">Speed</span>
+                                <span class="secondary hidden-sm hidden-xs" id="iface_name_span">Speed</span>
                             </div>
                             <div class="values col-sm-6 col-xs-6">
                                 <div class="secondary hidden-sm hidden-xs">
@@ -259,6 +259,8 @@
         bw_tx_gauge.value = (message.tx_speed/(1024)).toFixed(2);
         $("#rx_speed_span").text(formatBps(message.rx_speed));
         $("#tx_speed_span").text(formatBps(message.tx_speed));
+        $("#iface_name_span").text("Speed ("+ message.iface +")" );
+
     });
 
     socket.on('autopial/system/network/ping/internet', function(message) {

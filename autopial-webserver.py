@@ -48,6 +48,10 @@ def system_status_html():
 def gps_info_html():
     return render_template('gps_info.html')
 
+@app.route("/supervisor.html")
+def supervisor_html():
+    return render_template('supervisor.html')
+
 def emit_all():
     logger.info("Emitting all topics on SocketIO")
     for key in redis_conn.scan_iter():
