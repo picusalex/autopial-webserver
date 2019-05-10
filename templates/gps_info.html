@@ -73,65 +73,68 @@
 	}).addTo(mymap);
 
     var location_marker = undefined;
-    socket.on('autopial/gps/location', function(message) {
-        console.log("Topic: autopial/gps/location = Valid:" + message.fix);
-        console.log("        + lat:" + message.latitude);
-        console.log("        + lon:" + message.longitude);
-        console.log("        + alt:" + message.altitude);
 
-        if (message.fix) {
-            $("#gps_fix_span").html('<span class="label label-success">Fix</span>');
-        }
-        else {
-            $("#gps_fix_span").html('<span class="label label-danger">No fix</span>');
-        }
+    function register_on_socketio_messages(socket) {
+        socket.on('autopial/gps/location', function(message) {
+            console.log("Topic: autopial/gps/location = Valid:" + message.fix);
+            console.log("        + lat:" + message.latitude);
+            console.log("        + lon:" + message.longitude);
+            console.log("        + alt:" + message.altitude);
 
-        $("#gps_lat_span").text(message.latitude);
-        $("#gps_lon_span").text(message.longitude);
-        $("#gps_alt_span").text(message.altitude);
-
-        if (message.fix) {
-            if (location_marker === undefined) {
-                location_marker = L.marker([message.latitude, message.longitude]).addTo(mymap);
-                mymap.setView([message.latitude, message.longitude],15)
+            if (message.fix) {
+                $("#gps_fix_span").html('<span class="label label-success">Fix</span>');
+            }
+            else {
+                $("#gps_fix_span").html('<span class="label label-danger">No fix</span>');
             }
 
-            mymap.panTo([message.latitude, message.longitude]);
-            location_marker.setLatLng([message.latitude, message.longitude]);
-        }
-    });
+            $("#gps_lat_span").text(message.latitude);
+            $("#gps_lon_span").text(message.longitude);
+            $("#gps_alt_span").text(message.altitude);
 
-    socket.on('autopial/gps/movement', function(message) {
-        console.log("Topic: autopial/gps/movement = Valid:" + message.fix);
-        console.log("        + speed:" + message.speed);
-        console.log("        + direction:" + message.direction);
+            if (message.fix) {
+                if (location_marker === undefined) {
+                    location_marker = L.marker([message.latitude, message.longitude]).addTo(mymap);
+                    mymap.setView([message.latitude, message.longitude],15)
+                }
 
-        if (message.fix) {
-            $("#gps_fix_span").html('<span class="label label-success">Fix</span>');
-        }
-        else {
-            $("#gps_fix_span").html('<span class="label label-danger">No fix</span>');
-        }
+                mymap.panTo([message.latitude, message.longitude]);
+                location_marker.setLatLng([message.latitude, message.longitude]);
+            }
+        });
 
-        $("#gps_speed_span").text(message.speed);
-        $("#gps_direct_span").text(message.direction);
-    });
+        socket.on('autopial/gps/movement', function(message) {
+            console.log("Topic: autopial/gps/movement = Valid:" + message.fix);
+            console.log("        + speed:" + message.speed);
+            console.log("        + direction:" + message.direction);
 
-    socket.on('autopial/gps/infos', function(message) {
-        console.log("Topic: autopial/gps/infos = Valid:" + message.fix);
-        console.log("        + precision_horiz:" + message.precision_horiz);
-        console.log("        + satellites:" + message.num_sats);
+            if (message.fix) {
+                $("#gps_fix_span").html('<span class="label label-success">Fix</span>');
+            }
+            else {
+                $("#gps_fix_span").html('<span class="label label-danger">No fix</span>');
+            }
 
-        if (message.fix) {
-            $("#gps_fix_span").html('<span class="label label-success">Fix</span>');
-        }
-        else {
-            $("#gps_fix_span").html('<span class="label label-danger">No fix</span>');
-        }
+            $("#gps_speed_span").text(message.speed);
+            $("#gps_direct_span").text(message.direction);
+        });
 
-        $("#gps_sats_span").text(message.satellites);
-        $("#gps_hdop_span").text(message.precision_horiz);
-    });
+        socket.on('autopial/gps/infos', function(message) {
+            console.log("Topic: autopial/gps/infos = Valid:" + message.fix);
+            console.log("        + precision_horiz:" + message.precision_horiz);
+            console.log("        + satellites:" + message.num_sats);
+
+            if (message.fix) {
+                $("#gps_fix_span").html('<span class="label label-success">Fix</span>');
+            }
+            else {
+                $("#gps_fix_span").html('<span class="label label-danger">No fix</span>');
+            }
+
+            $("#gps_sats_span").text(message.satellites);
+            $("#gps_hdop_span").text(message.precision_horiz);
+        });
+    }
 
 </script>
 

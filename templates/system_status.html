@@ -147,14 +147,6 @@
         animationDuration: 1000,
     }).draw();
 
-    socket.on('autopial/system/cpu', function(message) {
-        console.log("Topic: autopial/system/cpu = " + message.usage);
-        $("#cpu_value_span").text(message.usage+'%');
-        $("#cpu_count_span").text(message.vcpu+" vCPU");
-        $("#cpu_freq_span").text(message.frequency.toFixed(0)+' MHz');
-        cpu_gauge.value = message.usage;
-    })
-
     var ram_gauge = new RadialGauge({
         renderTo: 'ram_gauge_div',
                 width: 150,
@@ -178,14 +170,6 @@
         animationDuration: 1000,
     }).draw();
 
-    socket.on('autopial/system/ram', function(message) {
-        console.log("Topic: autopial/system/ram = " + message.usage);
-        $("#ram_value_span").text(message.usage.toFixed(0)+'%');
-        $("#ram_used_span").text(formatBytes(message.used));
-        $("#ram_total_span").text(formatBytes(message.total));
-        ram_gauge.value = message.usage.toFixed(0);
-    })
-
     var swap_gauge = new RadialGauge({
         renderTo: 'swap_gauge_div',
                 width: 150,
@@ -208,14 +192,6 @@
         minorTicks: 10,
         animationDuration: 1000,
     }).draw();
-
-    socket.on('autopial/system/swap', function(message) {
-        console.log("Topic: autopial/system/swap = " + message.usage);
-        $("#swap_value_span").text(message.usage.toFixed(0)+'%');
-        $("#swap_used_span").text(formatBytes(message.used));
-        $("#swap_total_span").text(formatBytes(message.total));
-        swap_gauge.value = message.usage.toFixed(0);
-    })
 
     var bw_rx_gauge = new RadialGauge({
         renderTo: 'bw_rx_gauge_div',
@@ -253,39 +229,68 @@
         units: "Mbps"
     }).draw();
 
-    socket.on('autopial/system/network/bandwidth', function(message) {
-        console.log("Topic: autopial/system/network/bandwidth = " + message.rx_speed +" / "+message.tx_speed);
-        bw_rx_gauge.value = (message.rx_speed/(1024)).toFixed(2);
-        bw_tx_gauge.value = (message.tx_speed/(1024)).toFixed(2);
-        $("#rx_speed_span").text(formatBps(message.rx_speed));
-        $("#tx_speed_span").text(formatBps(message.tx_speed));
-        $("#iface_name_span").text("Speed ("+ message.iface +")" );
+    function register_on_socketio_messages(socket) {
 
-    });
+        socket.on('autopial/system/cpu', function(message) {
+            console.log("Topic: autopial/system/cpu = " + message.usage);
+            $("#cpu_value_span").text(message.usage+'%');
+            $("#cpu_count_span").text(message.vcpu+" vCPU");
+            $("#cpu_freq_span").text(message.frequency.toFixed(0)+' MHz');
+            cpu_gauge.value = message.usage;
+        })
 
-    socket.on('autopial/system/network/ping/internet', function(message) {
-        console.log("Topic: autopial/network/ping/internet = " + message.value);
-        if (message.value === true) {
-            $("#internet_ping_span").removeClass("down");
-            $("#internet_ping_span").addClass("up");
-        }
-        else {
-            $("#internet_ping_span").addClass("down");
-            $("#internet_ping_span").removeClass("up");
-        }
-    });
+        socket.on('autopial/system/ram', function(message) {
+            console.log("Topic: autopial/system/ram = " + message.usage);
+            $("#ram_value_span").text(message.usage.toFixed(0)+'%');
+            $("#ram_used_span").text(formatBytes(message.used));
+            $("#ram_total_span").text(formatBytes(message.total));
+            ram_gauge.value = message.usage.toFixed(0);
+        })
 
-    socket.on('autopial/system/network/ping/pixussi', function(message) {
-        console.log("Topic: autopial/network/ping/pixussi = " + message.value);
-        if (message.value === true) {
-            $("#pixussi_ping_span").removeClass("down");
-            $("#pixussi_ping_span").addClass("up");
-        }
-        else {
-            $("#pixussi_ping_span").addClass("down");
-            $("#pixussi_ping_span").removeClass("up");
-        }
-    });
+        socket.on('autopial/system/swap', function(message) {
+            console.log("Topic: autopial/system/swap = " + message.usage);
+            $("#swap_value_span").text(message.usage.toFixed(0)+'%');
+            $("#swap_used_span").text(formatBytes(message.used));
+            $("#swap_total_span").text(formatBytes(message.total));
+            swap_gauge.value = message.usage.toFixed(0);
+        })
+
+        socket.on('autopial/system/network/bandwidth', function(message) {
+            console.log("Topic: autopial/system/network/bandwidth = " + message.rx_speed +" / "+message.tx_speed);
+            bw_rx_gauge.value = (message.rx_speed/(1024)).toFixed(2);
+            bw_tx_gauge.value = (message.tx_speed/(1024)).toFixed(2);
+            $("#rx_speed_span").text(formatBps(message.rx_speed));
+            $("#tx_speed_span").text(formatBps(message.tx_speed));
+            $("#iface_name_span").text("Speed ("+ message.iface +")" );
+
+        });
+
+        socket.on('autopial/system/network/ping/internet', function(message) {
+            console.log("Topic: autopial/network/ping/internet = " + message.value);
+            if (message.value === true) {
+                $("#internet_ping_span").removeClass("down");
+                $("#internet_ping_span").addClass("up");
+            }
+            else {
+                $("#internet_ping_span").addClass("down");
+                $("#internet_ping_span").removeClass("up");
+            }
+        });
+
+        socket.on('autopial/system/network/ping/pixussi', function(message) {
+            console.log("Topic: autopial/network/ping/pixussi = " + message.value);
+            if (message.value === true) {
+                $("#pixussi_ping_span").removeClass("down");
+                $("#pixussi_ping_span").addClass("up");
+            }
+            else {
+                $("#pixussi_ping_span").addClass("down");
+                $("#pixussi_ping_span").removeClass("up");
+            }
+        });
+
+    }
+
 
 </script>
 

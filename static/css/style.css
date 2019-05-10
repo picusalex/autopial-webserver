@@ -231,8 +231,6 @@ ul.top-menu > .uptime {
     color: #797979;
 	font-size: 12px;
 	padding: 5px 15px;
-	margin-right: 15px;
-	margin-top: 15px;
 }
 
 
@@ -723,6 +721,22 @@ ul.top-menu > li > a:hover, ul.top-menu > li > a:focus {
     opacity: 0;
     position: absolute;
     left: 7px;
+    top: -18px;
+    transition: all 0.25s ease 0s;
+    width: 0;
+    z-index: 10;
+    margin-top: 10px;
+    opacity: 1;
+}
+
+.notify-arrow-right {
+    border-style: solid;
+    border-width: 0 9px 9px;
+    height: 0;
+    margin-top: 0;
+    opacity: 0;
+    position: absolute;
+    right: 7px;
     top: -18px;
     transition: all 0.25s ease 0s;
     width: 0;

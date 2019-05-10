@@ -233,10 +233,27 @@
             </ul>
             <!--  notification end -->
         </div>
-        <div class="top-menu">
+        <div class="nav notify-row pull-right">
             <ul class="nav pull-right top-menu">
-                <li class="uptime hidden-sm hidden-xs">Uptime: <span id="uptime_span"></span></li>
-                <li><a class="logout hidden-sm hidden-xs" href="login.html">Logout</a></li>
+                <li class="uptime hidden-sm hidden-xs">Uptime:
+                    <span id="uptime_span"></span>
+                </li>
+                <li class="dropdown">
+                    <a data-toggle="dropdown" class="dropdown-toggle" href="index.html#">
+                        <i id="selected_autopial_id">N/A</i>
+                        <span id="available_autopial_ids_number" class="badge bg-theme">{{ device_list|length }}</span>
+                    </a>
+                    <ul class="dropdown-menu extended tasks-bar pull-right">
+                        <div class="notify-arrow-right notify-arrow-green"></div>
+                        <div id="autopial_ids_list">
+                        {% for device in device_list %}
+                            <li>
+                                <a onClick="autopial_id_changed('{{ device.autopial_uid }}'); return false;">{{ device.autopial_uid }}</a>
+                            </li>'
+                        {% endfor %}
+                        </div>
+                    </ul>
+                </li>
             </ul>
         </div>
     </header>
@@ -328,25 +345,45 @@
 <script src="static/js/utils.js"></script>
 <!--script for this page-->
 
+{% block footer %}{% endblock %}
 
 <script src="static/js/socket.io.js"></script>
 <script type="text/javascript">
     var pathname = window.location.pathname;
+    var current_room = undefined;
     console.log(pathname);
     $("a[href$='"+pathname+"']").parent().addClass("active");
     $("a[href$='"+pathname+"']").parent().parent().prev().addClass("active");
 
-    var socket = io.connect(window.location.origin);
-    socket.on('autopial/system/boottime', function(message) {
-        console.log("Topic: autopial/system/boottime = " + message.value);
+    var socket_globalnsp = io.connect(window.location.origin);
 
-        $("#uptime_span").text(pretty_timeDifference(message.value).friendlyNiceText);
-    })
+    if (sessionStorage.getItem("current_room")) {
+        current_room = sessionStorage.getItem("current_room");
+        autopial_id_changed(current_room);
+    }
+
+    function autopial_id_changed(autopial_id) {
+        console.log("Autopial id changed:" + autopial_id);
+        current_room = autopial_id;
+        $("#selected_autopial_id").text(current_room);
+        sessionStorage.setItem('current_room', current_room);
+
+        var socket_namespace = io.connect(window.location.origin+"/"+current_room);
+
+        socket_namespace.on('autopial/system/boottime', function(message) {
+            console.log("Topic: autopial/system/boottime = " + message.value);
+            $("#uptime_span").text(pretty_timeDifference(message.value).friendlyNiceText);
+        })
+
+        register_on_socketio_messages(socket_namespace);
+
+        socket_globalnsp.emit('refresh');
+    }
+
+
 
 
 </script>
-
-{% block footer %}{% endblock %}
 
 </body>
 
