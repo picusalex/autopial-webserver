@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{% block title %}Index{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="static/DataTables/datatables.min.css"/>
+{% endblock %}
+
+{% block content %}
+    <section class="wrapper">
+        <h3><i class="fa fa-angle-right"></i> Trip history</h3>
+        <div class="row mb">
+            <!-- page start-->
+            <div class="content-panel">
+                <div class="adv-table">
+                    <table cellpadding="0" cellspacing="0" border="0" class="display table table-bordered" id="hidden-table-info">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Duration</th>
+                                <th class="hidden-phone">Length</th>
+                                <th class="hidden-phone">Status</th>
+                                <th class="hidden-phone">Origin</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for session in sessions %}
+                            <tr class="gradeX">
+                                <td>{{ session.start_date }}</td>
+                                <td>{{ session.duration }}</td>
+                                <td class="hidden-phone">{{ session.length }}</td>
+                                <td class="center hidden-phone">{{ session.status }}</td>
+                                <td class="center hidden-phone">{{ session.origin }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+          <!-- page end-->
+        </div>
+        <!-- /row -->
+    </section>
+{% endblock %}
+
+{% block footer %}
+<script type="text/javascript" src="static/DataTables/datatables.min.js"></script>
+<script type="text/javascript">
+    /*
+    * Initialse DataTables, with no sorting on the 'details' column
+    */
+    var oTable = $('#hidden-table-info').dataTable({
+        "order": [[ 0, "desc" ]]
+    });
+</script>
+{% endblock %}

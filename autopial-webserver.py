@@ -7,13 +7,14 @@ import threading
 import uuid
 
 import time
-from flask import Flask, render_template, Response, jsonify, send_file, abort
+from flask import Flask, render_template, Response, jsonify, send_file, abort, g
 import logging
 import paho.mqtt.client as mqtt #import the client1
 from flask_socketio import SocketIO, join_room, leave_room
 import redis
 
 from autopial_lib.config_driver import ConfigFile
+from autopial_lib.database_driver import DatabaseDriver
 
 logger = logging.getLogger("sibus-server")
 logger.setLevel(logging.DEBUG)
@@ -24,6 +25,7 @@ logger.addHandler(steam_handler)
 
 redis_conn = None
 supervisor_url = None
+db = None
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -56,6 +58,27 @@ def gps_info_html():
 @app.route("/supervisor.html")
 def supervisor_html():
     return render_template('supervisor.html', device_list=device_list(), supervisor_url=supervisor_url)
+
+@app.route("/session_history.html")
+def session_history_html():
+    sessions = get_db().get_all_sessions()
+    return render_template('session_history.html', device_list=device_list(), sessions = sessions)
+
+def get_db():
+    """Opens a new database connection if there is none yet for the
+    current application context.
+    """
+    if not hasattr(g, 'db_session'):
+        logger.info("Connecting to database: {}".format(database_path))
+        g.db_session = DatabaseDriver(database=database_path, logger=logger)
+    return g.db_session
+
+@app.teardown_appcontext
+def close_db(error):
+    """Closes the database again at the end of the request."""
+    #if hasattr(g, 'db_session'):
+    #    g.db_session.close()
+    pass
 
 def emit_all():
     logger.info("Emitting all topics on SocketIO")
@@ -124,6 +147,7 @@ if __name__ == '__main__':
     cfg = ConfigFile("autopial-webserver.cfg", logger=logger)
     try:
         supervisor_url = cfg.get("supervisor", "url")
+        database_path = cfg.get("database", "path")
     except BaseException as e:
         logger.error("Invalid config file: {}".format(e))
         sys.exit(1)
