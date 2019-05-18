@@ -1,0 +1,8 @@
+flask
+flask-socketio
+paho-mqtt
+redis
+sqlalchemy
+pyyaml==5.1
+gevent
+

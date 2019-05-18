@@ -1,11 +1,7 @@
 
-function pretty_timeDifference(strtdatetime) {
-  var datetime = new Date(strtdatetime);
+
+function pretty_millisecondsDisplay(nDiff) {
   var oResult = {};
-
-  var oToday = new Date();
-
-  var nDiff = oToday.getTime() - datetime.getTime();
 
   // Get diff in days
   oResult.days = Math.floor(nDiff / 1000 / 60 / 60 / 24);
@@ -91,6 +87,18 @@ function pretty_timeDifference(strtdatetime) {
 
   return oResult;
 }
+
+function pretty_timeDifference(strtdatetime) {
+  var datetime = new Date(strtdatetime);
+  var oResult = {};
+
+  var oToday = new Date();
+
+  var nDiff = oToday.getTime() - datetime.getTime();
+
+  return pretty_secondsDisplay(nDiff);
+}
+
 
 function formatBytes(bytes, decimals = 2) {
     if (bytes === 0) return '0 Bytes';

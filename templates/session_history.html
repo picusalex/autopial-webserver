@@ -3,7 +3,7 @@
 {% block title %}Index{% endblock %}
 
 {% block head %}
-    <link rel="stylesheet" type="text/css" href="static/DataTables/datatables.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/static/DataTables/datatables.min.css"/>
 {% endblock %}
 
 {% block content %}
@@ -18,7 +18,9 @@
                             <tr>
                                 <th>Date</th>
                                 <th>Duration</th>
-                                <th class="hidden-phone">Length</th>
+                                <th>Distance</th>
+                                <th class="hidden-phone">Start</th>
+                                <th class="hidden-phone">End</th>
                                 <th class="hidden-phone">Status</th>
                                 <th class="hidden-phone">Origin</th>
                             </tr>
@@ -26,9 +28,14 @@
                         <tbody>
                             {% for session in sessions %}
                             <tr class="gradeX">
-                                <td>{{ session.start_date }}</td>
+                                <td><a href="{{ url_for('session_viewer_html') }}/{{ session.id }}">
+                                        {{ session.start_date }}
+                                    </a>
+                                </td>
                                 <td>{{ session.duration }}</td>
-                                <td class="hidden-phone">{{ session.length }}</td>
+                                <td>{{ session.distance }}</td>
+                                <td class="center hidden-phone">{{ session.start_point_lat }}, {{ session.start_point_lon }}</td>
+                                <td class="center hidden-phone">{{ session.end_point_lat }}, {{ session.end_point_lon }}</td>
                                 <td class="center hidden-phone">{{ session.status }}</td>
                                 <td class="center hidden-phone">{{ session.origin }}</td>
                             </tr>
@@ -44,7 +51,7 @@
 {% endblock %}
 
 {% block footer %}
-<script type="text/javascript" src="static/DataTables/datatables.min.js"></script>
+<script type="text/javascript" src="/static/DataTables/datatables.min.js"></script>
 <script type="text/javascript">
     /*
     * Initialse DataTables, with no sorting on the 'details' column

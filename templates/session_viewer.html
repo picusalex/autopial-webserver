@@ -1,0 +1,128 @@
+{% extends "layout.html" %}
+
+{% block title %}GPS Info{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
+   integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+   crossorigin=""/>
+
+ <style type="text/css">
+    #mapid { height: 400px; }
+ </style>
+
+{% endblock %}
+
+{% block content %}
+    <section class="wrapper site-min-height">
+        <h3><i class="fa fa-angle-right"></i> Session {{ session_id }}</h3>
+        <div class="row mt">
+            <div class="col-lg-6 col-md-6 col-sm-12 mb">
+                <section class="panel">
+                    <div class="panel-body">
+                        <div id="mapid"></div>
+                    </div>
+                </section>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-6 mb">
+                <section class="panel">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="infos col-sm-6 mb">
+                                <div>Start point</div>
+                                <div>End point</div>
+                                <div>Start date</div>
+                                <div>End date</div>
+                                <div>Duration</div>
+                                <div>Distance</div>
+                                <div>Max speed</div>
+                            </div>
+                            <div class="values col-sm-6 mb">
+                                <div>{{ session.start_point_lat }}, {{session.start_point_lon}}</div>
+                                <div>{{ session.end_point_lat }}, {{ session.end_point_lon }}</div>
+                                <div>{{ session.start_date }}</div>
+                                <div>{{ session.end_date }}</div>
+                                <div>
+                                    <script type="text/javascript">
+                                        document.write(pretty_millisecondsDisplay({{ session.duration }}*1000).friendlyNiceText);
+                                    </script>
+                                </div>
+                                <div>{{ session.Distance }}</div>
+                                <div>0</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-6 mb">
+                <section class="panel">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="infos col-sm-6 mb">
+                                <div>GPS Fix</div>
+                                <div># satellites</div>
+                                <div>Precision</div>
+                                <div>Latitude</div>
+                                <div>Longitude</div>
+                                <div>Altitude</div>
+                                <div>Speed</div>
+                                <div>Direction</div>
+                            </div>
+                            <div class="values col-sm-6 mb">
+                                <div id="gps_fix_span"><span class="label">N/A</span></div>
+                                <div id="gps_sats_span">N/A</div>
+                                <div id="gps_hdop_span">N/A</div>
+                                <div id="gps_lat_span">N/A</div>
+                                <div id="gps_lon_span">N/A</div>
+                                <div id="gps_alt_span">N/A</div>
+                                <div id="gps_speed_span">N/A</div>
+                                <div id="gps_direct_span">N/A</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block footer %}
+<!-- Make sure you put this AFTER Leaflet's CSS -->
+ <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
+   integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
+   crossorigin=""></script>
+
+<script type="text/javascript">
+    var mymap = L.map('mapid').setView([46.690279, 2.456010], 4);
+    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+		maxZoom: 18,
+		attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+			'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+			'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+		id: 'mapbox.streets'
+	}).addTo(mymap);
+
+    var location_marker = undefined;
+
+    var gps_url = "/session/{{session.id}}/gps";
+    $.getJSON(gps_url, function(gps_locations) {
+        console.log("GPS data retrieved ! ("+gps_locations.length+" entries)");
+
+        var polyline = L.polyline([], {color: 'red'}).addTo(mymap);
+        gps_locations.forEach(function(location) {
+          console.log(location);
+          if (location.latitude != 0 && location.longitude != 0) {
+            polyline.addLatLng([location.latitude, location.longitude]);
+          }
+        });
+        mymap.fitBounds(polyline.getBounds());
+
+    });
+
+
+
+
+</script>
+
+
+{% endblock %}

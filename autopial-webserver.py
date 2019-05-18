@@ -64,6 +64,23 @@ def session_history_html():
     sessions = get_db().get_all_sessions()
     return render_template('session_history.html', device_list=device_list(), sessions = sessions)
 
+@app.route("/session_viewer.html")
+@app.route("/session_viewer.html/<autopial_id>")
+def session_viewer_html(autopial_id=None):
+    session = get_db().get_session(autopial_id)
+    if session is not None:
+        return render_template('session_viewer.html', device_list=device_list(), session = session)
+    else:
+        abort(404)
+
+@app.route("/session/<autopial_id>/gps")
+def session_gps_json(autopial_id=None):
+    gps_locations = get_db().get_gps_locations(autopial_id)
+    if gps_locations is not None:
+        return jsonify(gps_locations)
+    else:
+        abort(404)
+
 def get_db():
     """Opens a new database connection if there is none yet for the
     current application context.
@@ -155,16 +172,20 @@ if __name__ == '__main__':
     try:
         redis_conn = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
     except redis.exceptions.ConnectionError as e:
-        logger.error("Connection to redis refused. Redis installed ? (sudo apt install redis-server)")
+        logger.error("Connection to local redis refused. Redis installed ? (sudo apt install redis-server)")
         sys.exit(1)
 
     broker_address = "localhost"
-    mqtt_client = mqtt.Client("sibus-server-{}".format(uuid.uuid4().hex))
+    mqtt_client = mqtt.Client("autopial-webserver-{}".format(uuid.uuid4().hex))
     mqtt_client.on_message = on_message
-    mqtt_client.connect(broker_address)
-    mqtt_client.loop_start()
-    mqtt_client.subscribe("autopial/#", qos=1)
+    try:
+        mqtt_client.connect(broker_address)
+        mqtt_client.loop_start()
+        mqtt_client.subscribe("autopial/#", qos=1)
+    except Exception as e:
+        logger.error("Connection to MQTT broker {} error ! ({})".format(broker_address, e))
+        sys.exit(1)
 
-    socketio.run(app, host="0.0.0.0", debug=True)
+    socketio.run(app, host="0.0.0.0", debug=False)
 
     mqtt_client.loop_stop()
