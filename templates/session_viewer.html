@@ -28,29 +28,46 @@
                 <section class="panel">
                     <div class="panel-body">
                         <div class="row">
-                            <div class="infos col-sm-6 mb">
-                                <div>Start point</div>
-                                <div>End point</div>
-                                <div>Start date</div>
-                                <div>End date</div>
-                                <div>Duration</div>
-                                <div>Distance</div>
-                                <div>Max speed</div>
-                            </div>
-                            <div class="values col-sm-6 mb">
-                                <div>{{ session.start_point_lat }}, {{session.start_point_lon}}</div>
-                                <div>{{ session.end_point_lat }}, {{ session.end_point_lon }}</div>
-                                <div>{{ session.start_date }}</div>
-                                <div>{{ session.end_date }}</div>
-                                <div>
-                                    <script type="text/javascript">
-                                        document.write(pretty_millisecondsDisplay({{ session.duration }}*1000).friendlyNiceText);
-                                    </script>
-                                </div>
-                                <div>{{ session.Distance }}</div>
-                                <div>0</div>
+                            <div class="col-sm-4">Start point</div>
+                            <div class="col-sm-8">{{ session.start_point_lat }}, {{session.start_point_lon}}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">End point</div>
+                            <div class="col-sm-8">{{ session.end_point_lat }}, {{ session.end_point_lon }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">Start date</div>
+                            <div class="col-sm-8">
+                                <script type="text/javascript">
+                                    document.write(pretty_dateDisplay("{{ session.start_date }}"));
+                                </script>
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="col-sm-4">End date</div>
+                            <div class="col-sm-8">
+                                <script type="text/javascript">
+                                    document.write(pretty_dateDisplay("{{ session.end_date }}"));
+                                </script>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">Duration</div>
+                            <div class="col-sm-8">
+                                <script type="text/javascript">
+                                    document.write(pretty_millisecondsDisplay({{ session.duration }}*1000).friendlyNiceText);
+                                </script>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="infos col-sm-4 mb">Distance</div>
+                            <div class="infos col-sm-8 mb">{{ session.distance }} km</div>
+                        </div>
+                        <div class="row">
+                            <div class="infos col-sm-4 mb">Max speed</div>
+                            <div class="infos col-sm-8 mb">0</div>
+                        </div>
+
                     </div>
                 </section>
             </div>
@@ -108,9 +125,13 @@
     $.getJSON(gps_url, function(gps_locations) {
         console.log("GPS data retrieved ! ("+gps_locations.length+" entries)");
 
-        var polyline = L.polyline([], {color: 'red'}).addTo(mymap);
+        var polyline = L.polyline([], {
+            color: '#5360fe',
+            opacity: 0.5
+        }).addTo(mymap);
+
         gps_locations.forEach(function(location) {
-          console.log(location);
+          //console.log(location);
           if (location.latitude != 0 && location.longitude != 0) {
             polyline.addLatLng([location.latitude, location.longitude]);
           }
