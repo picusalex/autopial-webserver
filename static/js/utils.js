@@ -126,3 +126,12 @@ function formatBps(bps, decimals = 2) {
     if (bps < 1) return bps.toFixed(dm)+' kbps'
     return parseFloat((bps / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
+
+function pretty_dateDisplay(strtdatetime) {
+    var dt = new Date(strtdatetime);
+    var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+
+    return days[dt.getDay()] + " " + dt.getDate() + " " + months[dt.getMonth()] + " " + dt.getFullYear() + " at " + dt.getHours() + ":" + dt.getMinutes();
+
+}
