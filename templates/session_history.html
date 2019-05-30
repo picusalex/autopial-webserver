@@ -17,7 +17,7 @@
                         <thead>
                             <tr>
                                 <th>Date</th>
-                                <th>Duration</th>
+                                <th data-type="num">Duration</th>
                                 <th>Distance</th>
                                 <th class="hidden-phone">Start</th>
                                 <th class="hidden-phone">End</th>
@@ -32,10 +32,14 @@
                                         {{ session.start_date }}
                                     </a>
                                 </td>
-                                <td>{{ session.duration }}</td>
-                                <td>{{ session.distance }}</td>
-                                <td class="center hidden-phone">{{ session.start_point_lat }}, {{ session.start_point_lon }}</td>
-                                <td class="center hidden-phone">{{ session.end_point_lat }}, {{ session.end_point_lon }}</td>
+                                <td>
+                                    <script type="text/javascript">
+                                        document.write(pretty_millisecondsDisplay({{ session.duration }}*1000).simple_duration);
+                                    </script>
+                                </td>
+                                <td>{{ session.distance|round(3) }} km</td>
+                                <td class="center hidden-phone">{{ session.first_address }} <br>({{ session.start_point_lat }}, {{ session.start_point_lon }})</td>
+                                <td class="center hidden-phone">{{ session.last_address }} <br>({{ session.end_point_lat }}, {{ session.end_point_lon }})</td>
                                 <td class="center hidden-phone">{{ session.status }}</td>
                                 <td class="center hidden-phone">{{ session.origin }}</td>
                             </tr>

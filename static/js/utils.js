@@ -60,6 +60,20 @@ function pretty_millisecondsDisplay(nDiff) {
   var sDuration = sDays + ':' + sHour + ':' + sMins + ':' + sSecs;
   oResult.duration = sDuration;
 
+  var sHumanDuration = sDays + 'd ' + sHour + 'h ' + sMins + 'm ' + sSecs;
+  oResult.human_duration = sHumanDuration;
+
+  var sSimpleDuration = "";
+  var fullHours = oResult.days * 24 + oResult.hours;
+  if (fullHours != 0) {
+    sSimpleDuration = sSimpleDuration + fullHours + "h "
+  }
+  if (oResult.minutes != 0) {
+    sSimpleDuration = sSimpleDuration + oResult.minutes + "m "
+  }
+  sSimpleDuration = sSimpleDuration + sSecs + "s"
+  oResult.simple_duration = sSimpleDuration;
+
   // Set friendly text for printing
   if(oResult.days === 0) {
 
@@ -96,7 +110,7 @@ function pretty_timeDifference(strtdatetime) {
 
   var nDiff = oToday.getTime() - datetime.getTime();
 
-  return pretty_secondsDisplay(nDiff);
+  return pretty_millisecondsDisplay(nDiff);
 }
 
 

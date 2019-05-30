@@ -3,7 +3,7 @@
 {% block title %}Index{% endblock %}
 
 {% block head %}
-<script src="static/js/gauge.min.js"></script>
+
 {% endblock %}
 
 {% block content %}
@@ -123,6 +123,7 @@
 {% endblock %}
 
 {% block footer %}
+<script src="/static/js/gauge.min.js"></script>
 <script type="text/javascript">
     var cpu_gauge = new RadialGauge({
         renderTo: 'cpu_gauge_div',

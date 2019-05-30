@@ -290,7 +290,7 @@
                         <span>Trips</span>
                     </a>
                     <ul class="sub">
-                        <li><a href="/session_viewer.html/743115bf51fc13addf6cdb28ab17d6bf">Replay</a></li>
+                        <li><a href="/session_calendar.html">Calendar</a></li>
                         <li><a href="/session_history.html">History</a></li>
                         <li><a href="/camera_timelap.html">Tracks</a></li>
                         <li><a href="camera_history.html">Cars</a></li>
@@ -356,8 +356,6 @@
 <script src="/static/js/common-scripts.js"></script>
 <!--script for this page-->
 
-{% block footer %}{% endblock %}
-
 <script src="/static/js/socket.io.js"></script>
 <script type="text/javascript">
     var pathname = window.location.pathname;
@@ -386,16 +384,26 @@
             $("#uptime_span").text(pretty_timeDifference(message.value).friendlyNiceText);
         })
 
-        register_on_socketio_messages(socket_namespace);
+        //register_on_socketio_messages(socket_namespace);
 
         socket_globalnsp.emit('refresh');
     }
 
-
+    function delete_session(session_id) {
+        $.ajax({
+            type: "DELETE",
+            url: "{{ url_for('session_delete') }}/"+session_id,
+            success: function(msg){
+                alert("Session Deleted: " + msg);
+            }
+        });
+        window.location.replace("{{ url_for('session_calendar_html') }}");
+    }
 
 
 </script>
 
+{% block footer %}{% endblock %}
 </body>
 
 </html>

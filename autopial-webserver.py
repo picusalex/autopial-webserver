@@ -14,7 +14,7 @@ from flask_socketio import SocketIO, join_room, leave_room
 import redis
 
 from autopial_lib.config_driver import ConfigFile
-from autopial_lib.database_driver import DatabaseDriver
+from autopial_lib.SQLDatabaseDriver.sql_driver import DatabaseDriver
 
 logger = logging.getLogger("sibus-server")
 logger.setLevel(logging.DEBUG)
@@ -64,6 +64,14 @@ def session_history_html():
     sessions = get_db().get_all_sessions()
     return render_template('session_history.html', device_list=device_list(), sessions = sessions)
 
+@app.route("/session_calendar.html")
+def session_calendar_html():
+    sessions = get_db().get_all_sessions()
+    for session in sessions:
+        if session.distance is None:
+            pass
+    return render_template('session_calendar.html', device_list=device_list(), sessions = sessions)
+
 @app.route("/session_viewer.html")
 @app.route("/session_viewer.html/<autopial_id>")
 def session_viewer_html(autopial_id=None):
@@ -73,13 +81,27 @@ def session_viewer_html(autopial_id=None):
     else:
         abort(404)
 
-@app.route("/session/<autopial_id>/gps")
-def session_gps_json(autopial_id=None):
-    gps_locations = get_db().get_gps_locations(autopial_id)
-    if gps_locations is not None:
-        return jsonify(gps_locations)
+@app.route("/session/<autopial_id>/data")
+def session_data_json(autopial_id=None):
+    car_data = get_db().get_cardata(autopial_id)
+    if car_data is not None:
+        return jsonify(car_data)
     else:
         abort(404)
+
+@app.route("/session/<autopial_id>/metadata")
+def session_metdadata_json(autopial_id=None):
+    session = get_db().update_session_metadata(autopial_id)
+    if session is not None:
+        return jsonify(session)
+    else:
+        abort(404)
+
+@app.route("/session", methods=['DELETE'])
+@app.route("/session/<autopial_id>", methods=['DELETE'])
+def session_delete(autopial_id=None):
+    result = get_db().delete_session(autopial_id)
+    return jsonify(result)
 
 def get_db():
     """Opens a new database connection if there is none yet for the
