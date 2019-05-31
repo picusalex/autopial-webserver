@@ -187,27 +187,32 @@ if __name__ == '__main__':
     try:
         supervisor_url = cfg.get("supervisor", "url")
         database_path = cfg.get("database", "path")
+        webserver_host = cfg.get("webserver", "host")
+        webserver_port = cfg.get("webserver", "port")
+        redis_host = cfg.get("redis_server", "host")
+        redis_port = cfg.get("redis_server", "port")
+        mqtt_host = cfg.get("mqtt_broker", "host")
+        mqtt_port = cfg.get("mqtt_broker", "port")
     except BaseException as e:
         logger.error("Invalid config file: {}".format(e))
         sys.exit(1)
 
     try:
-        redis_conn = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+        redis_conn = redis.Redis(host=redis_host, port=redis_port, db=0, decode_responses=True)
     except redis.exceptions.ConnectionError as e:
         logger.error("Connection to local redis refused. Redis installed ? (sudo apt install redis-server)")
         sys.exit(1)
 
-    broker_address = "localhost"
     mqtt_client = mqtt.Client("autopial-webserver-{}".format(uuid.uuid4().hex))
     mqtt_client.on_message = on_message
     try:
-        mqtt_client.connect(broker_address)
+        mqtt_client.connect(host=mqtt_host, port=mqtt_port)
         mqtt_client.loop_start()
         mqtt_client.subscribe("autopial/#", qos=1)
     except Exception as e:
-        logger.error("Connection to MQTT broker {} error ! ({})".format(broker_address, e))
+        logger.error("Connection to MQTT broker {}:{} error ! ({})".format(mqtt_host, mqtt_port, e))
         sys.exit(1)
 
-    socketio.run(app, host="0.0.0.0", debug=False)
+    socketio.run(app, host=webserver_host, port=webserver_port, debug=False)
 
     mqtt_client.loop_stop()
