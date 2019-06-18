@@ -62,14 +62,28 @@ def supervisor_html():
 @app.route("/session_history.html")
 def session_history_html():
     sessions = get_db().get_all_sessions()
+    for session in sessions:
+        session.nbr_events = len(get_db().get_cardata(session.id))
+
     return render_template('session_history.html', device_list=device_list(), sessions = sessions)
 
 @app.route("/session_calendar.html")
 def session_calendar_html():
     sessions = get_db().get_all_sessions()
+    event_colors = [ "#6CEBE2",
+                     "#62E1D8", "#58D7CE", "#4ecdc4",
+                     "#44C3BA", "#3AB9B0", "#30AFA6",
+                     "#26A59C", "#1C9B92", "#129188",
+                     "#08877E", "#007D74"]
+    max_distance = 50
+    color_step = max_distance/len(event_colors)
+
     for session in sessions:
-        if session.distance is None:
-            pass
+        color_idx = int(session.distance/color_step)
+        if color_idx > len(event_colors)-1:
+            color_idx = len(event_colors) - 1
+        session.event_color = event_colors[int(color_idx)]
+
     return render_template('session_calendar.html', device_list=device_list(), sessions = sessions)
 
 @app.route("/session_viewer.html")
@@ -198,14 +212,16 @@ if __name__ == '__main__':
         sys.exit(1)
 
     try:
+        logger.info("Connecting to redis server {}:{}".format(redis_host, redis_port))
         redis_conn = redis.Redis(host=redis_host, port=redis_port, db=0, decode_responses=True)
     except redis.exceptions.ConnectionError as e:
-        logger.error("Connection to local redis refused. Redis installed ? (sudo apt install redis-server)")
+        logger.error(" ! Connection to redis refused. Redis installed ? (sudo apt install redis-server)")
         sys.exit(1)
 
     mqtt_client = mqtt.Client("autopial-webserver-{}".format(uuid.uuid4().hex))
     mqtt_client.on_message = on_message
     try:
+        logger.info("Connecting to MQTT broker {}:{}".format(mqtt_host, mqtt_port))
         mqtt_client.connect(host=mqtt_host, port=mqtt_port)
         mqtt_client.loop_start()
         mqtt_client.subscribe("autopial/#", qos=1)
@@ -213,6 +229,7 @@ if __name__ == '__main__':
         logger.error("Connection to MQTT broker {}:{} error ! ({})".format(mqtt_host, mqtt_port, e))
         sys.exit(1)
 
-    socketio.run(app, host=webserver_host, port=webserver_port, debug=False)
+    logger.info("Serving HTML on {}:{}".format(webserver_host, webserver_port))
+    socketio.run(app, host=webserver_host, port=webserver_port, debug=True)
 
     mqtt_client.loop_stop()

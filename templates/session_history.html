@@ -21,8 +21,11 @@
                                 <th>Distance</th>
                                 <th class="hidden-phone">Start</th>
                                 <th class="hidden-phone">End</th>
+                                <th class="hidden-phone">Nbr events</th>
                                 <th class="hidden-phone">Status</th>
                                 <th class="hidden-phone">Origin</th>
+                                <th class="hidden-phone">Last modif.</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -32,16 +35,21 @@
                                         {{ session.start_date }}
                                     </a>
                                 </td>
-                                <td>
+                                <td data-order="{{ session.duration }}">
                                     <script type="text/javascript">
                                         document.write(pretty_millisecondsDisplay({{ session.duration }}*1000).simple_duration);
                                     </script>
                                 </td>
-                                <td>{{ session.distance|round(3) }} km</td>
+                                <td data-order="{{ session.distance }}">{{ session.distance|round(3) }} km</td>
                                 <td class="center hidden-phone">{{ session.first_address }} <br>({{ session.start_point_lat }}, {{ session.start_point_lon }})</td>
                                 <td class="center hidden-phone">{{ session.last_address }} <br>({{ session.end_point_lat }}, {{ session.end_point_lon }})</td>
+                                <td class="center hidden-phone">{{ session.nbr_events }}</td>
                                 <td class="center hidden-phone">{{ session.status }}</td>
                                 <td class="center hidden-phone">{{ session.origin }}</td>
+                                <td class="center hidden-phone">{{ session.last_comm }}</td>
+                                <td class="center">
+                                    <button type="button" class="btn btn-default btn-xs">Delete</button>
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>

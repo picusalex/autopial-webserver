@@ -176,6 +176,8 @@
 <script src="/static/js/gauge.min.js"></script>
 
 <script type="text/javascript">
+(function() {
+
     var mymap = L.map('mapid').setView([46.690279, 2.456010], 4);
     var location_marker = undefined;
     var polyline_fullpath = undefined;
@@ -319,6 +321,7 @@
         minorTicks: 10,
         animationDuration: 1000,
     }).draw();
+})();
 
 </script>
 

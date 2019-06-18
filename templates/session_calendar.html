@@ -56,7 +56,6 @@
     var calendar = new FullCalendar.Calendar(calendarEl, {
         plugins: [ 'interaction', 'dayGrid', 'timeGrid', 'list'],
         defaultView: 'dayGridMonth',
-        defaultDate: '2019-05-07',
         height: 600,
         firstDay: 1,
         header: {
@@ -71,22 +70,19 @@
             {% for session in sessions %}
             {
                 {% if session.distance != None and session.duration != None %}
-                title: {{ session.distance|round(3) if session.distance != None else 'None' }} + "km, " + pretty_millisecondsDisplay({{ session.duration }}*1000).simple_duration,
-                backgroundColor: "#4ECDC4",
+                title: {{ session.distance|round(1) if session.distance != None else 'None' }} + "km, " + pretty_millisecondsDisplay({{ session.duration }}*1000).simple_duration,
+                backgroundColor: "{{ session.event_color }}",
                 {% else %}
                 title: "Status: {{ session.status }}",
                 backgroundColor: "#FCB322",
+                textColor: "#CC4E56"
                 {% endif %}
-
                 start: Date.parse("{{ session.start_date.strftime("%Y-%m-%d %H:%M") }}"),
-
                 {% if session.end_date != None %}
                 end: Date.parse("{{ session.end_date.strftime("%Y-%m-%d %H:%M")}}"),
                 {% endif %}
-
                 url: '{{ url_for('session_viewer_html') }}/{{ session.id }}',
                 allDay: false,
-
             },
             {% endfor %}
         ]
