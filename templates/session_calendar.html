@@ -81,7 +81,7 @@
                 {% if session.end_date != None %}
                 end: Date.parse("{{ session.end_date.strftime("%Y-%m-%d %H:%M")}}"),
                 {% endif %}
-                url: '{{ url_for('session_viewer_html') }}/{{ session.id }}',
+                url: '{{ url_for('session_viewer_html') }}/{{ session.uid }}',
                 allDay: false,
             },
             {% endfor %}
