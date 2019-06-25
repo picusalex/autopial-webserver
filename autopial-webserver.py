@@ -7,14 +7,15 @@ import threading
 import uuid
 
 import time
-from flask import Flask, render_template, Response, jsonify, send_file, abort, g
+from flask import Flask, render_template, jsonify, abort, g
 import logging
-import paho.mqtt.client as mqtt #import the client1
-from flask_socketio import SocketIO, join_room, leave_room
+import paho.mqtt.client as mqtt
+from flask_socketio import SocketIO
 import redis
 
 from autopial_lib.config_driver import ConfigFile
-from autopial_lib.SQLDatabaseDriver.sql_driver import DatabaseDriver
+from autopial_lib.MongoDatabaseDriver.CarDriver import CarDriver
+from autopial_lib.Controller.CarController import CarController
 
 logger = logging.getLogger("sibus-server")
 logger.setLevel(logging.DEBUG)
@@ -29,6 +30,17 @@ db = None
 
 app = Flask(__name__)
 socketio = SocketIO(app)
+
+def get_car_controller():
+    """Opens a new database connection if there is none yet for the
+    current application context.
+    """
+    if not hasattr(g, 'car_controller'):
+        logger.info("Connecting to database: {}".format(database_path))
+        db_driver = CarDriver(db_path=database_path, logger=logger)
+        g.car_controller = CarController(db_driver=db_driver, logger=logger)
+
+    return g.car_controller
 
 @app.route("/")
 @app.route("/index.html")
@@ -61,15 +73,12 @@ def supervisor_html():
 
 @app.route("/session_history.html")
 def session_history_html():
-    sessions = get_db().get_all_sessions()
-    for session in sessions:
-        session.nbr_events = len(get_db().get_cardata(session.id))
-
+    sessions = get_car_controller().get_all()
     return render_template('session_history.html', device_list=device_list(), sessions = sessions)
 
 @app.route("/session_calendar.html")
 def session_calendar_html():
-    sessions = get_db().get_all_sessions()
+    sessions = get_car_controller().get_all()
     event_colors = [ "#6CEBE2",
                      "#62E1D8", "#58D7CE", "#4ecdc4",
                      "#44C3BA", "#3AB9B0", "#30AFA6",
@@ -89,23 +98,24 @@ def session_calendar_html():
 @app.route("/session_viewer.html")
 @app.route("/session_viewer.html/<autopial_id>")
 def session_viewer_html(autopial_id=None):
-    session = get_db().get_session(autopial_id)
+    session = get_car_controller().get(autopial_id)
     if session is not None:
         return render_template('session_viewer.html', device_list=device_list(), session = session)
     else:
         abort(404)
 
 @app.route("/session/<autopial_id>/data")
-def session_data_json(autopial_id=None):
-    car_data = get_db().get_cardata(autopial_id)
-    if car_data is not None:
-        return jsonify(car_data)
-    else:
-        abort(404)
+@app.route("/session/<autopial_id>/data/<int:offset>")
+def session_data_json(autopial_id=None, offset=0):
+    limit=250
+    jdict = dict(car_data = get_car_controller().get_car_data(autopial_id, offset=offset, limit=limit))
+    if len(jdict["car_data"]) >= limit:
+        jdict["next_offset"] = offset + len(jdict["car_data"])
+    return jsonify(jdict)
 
 @app.route("/session/<autopial_id>/metadata")
 def session_metdadata_json(autopial_id=None):
-    session = get_db().update_session_metadata(autopial_id)
+    session = get_car_controller().update_session_metadata(autopial_id)
     if session is not None:
         return jsonify(session)
     else:
@@ -114,24 +124,8 @@ def session_metdadata_json(autopial_id=None):
 @app.route("/session", methods=['DELETE'])
 @app.route("/session/<autopial_id>", methods=['DELETE'])
 def session_delete(autopial_id=None):
-    result = get_db().delete_session(autopial_id)
+    result = get_car_controller().delete_session(autopial_id)
     return jsonify(result)
-
-def get_db():
-    """Opens a new database connection if there is none yet for the
-    current application context.
-    """
-    if not hasattr(g, 'db_session'):
-        logger.info("Connecting to database: {}".format(database_path))
-        g.db_session = DatabaseDriver(database=database_path, logger=logger)
-    return g.db_session
-
-@app.teardown_appcontext
-def close_db(error):
-    """Closes the database again at the end of the request."""
-    #if hasattr(g, 'db_session'):
-    #    g.db_session.close()
-    pass
 
 def emit_all():
     logger.info("Emitting all topics on SocketIO")

@@ -17,7 +17,7 @@
     <section class="wrapper site-min-height">
         <div class="row">
             <div class="col-lg-6">
-                <h3><i class="fa fa-angle-right"></i> Session {{ session.id }}</h3>
+                <h3><i class="fa fa-angle-right"></i> Session {{ session.uid }}</h3>
             </div>
             <div class="col-lg-6">
                 <h3 class="btn-group pull-right">
@@ -31,7 +31,7 @@
                       <li><a href="#">Another action</a></li>
                       <li><a href="#">Something else here</a></li>
                       <li class="divider"></li>
-                      <li><a onclick="delete_session('{{ session.id }}'); return false;">Delete</a></li>
+                      <li><a onclick="delete_session('{{ session.uid }}'); return false;">Delete</a></li>
                     </ul>
                 </h3>
             </div>
@@ -108,9 +108,9 @@
                         </div>
                         <div class="row">
                             <div class="col-sm-2">Start point</div>
-                            <div class="col-sm-4">{{ session.start_point_lat }}, {{session.start_point_lon}}</div>
+                            <div class="col-sm-4">{{ session.start_point }}</div>
                             <div class="col-sm-2">End point</div>
-                            <div class="col-sm-4">{{ session.end_point_lat }}, {{ session.end_point_lon }}</div>
+                            <div class="col-sm-4">{{ session.end_point }}</div>
                         </div>
                         <div class="row">
                             <div class="col-sm-2">Duration</div>
@@ -177,14 +177,16 @@
 
 <script type="text/javascript">
 (function() {
-
-    var mymap = L.map('mapid').setView([46.690279, 2.456010], 4);
-    var location_marker = undefined;
-    var polyline_fullpath = undefined;
+    var origin = [0,0]
+    var mymap = L.map('mapid').setView(origin, 4);
+    marker = L.marker(origin).addTo(mymap);
+    polyline_fullpath = L.polyline([], {
+        color: '#5360fe',
+        opacity: 0.5
+    }).addTo(mymap);
 
     var current_idx = 0;
-    var car_data = undefined;
-    var marker = undefined;
+    var car_data = [];
 
     function set_point_on_map(idx) {
         var point = car_data[idx];
@@ -228,32 +230,33 @@
       set_data(idx);
     }
 
-    var cardata_url = "/session/{{session.id}}/data";
-    $.getJSON(cardata_url, function(data) {
-        car_data = data;
-        console.log("Car data retrieved ! ("+data.length+" entries)");
-        timestamp_slider.max = data.length;
+    var cardata_url = "/session/{{session.uid}}/data";
+    function get_data(offset) {
+        var url = cardata_url + "/" + offset;
 
-        polyline_fullpath = L.polyline([], {
-            color: '#5360fe',
-            opacity: 0.5
-        }).addTo(mymap);
+        $.getJSON(url, function(data) {
+            data_slice = data.car_data;
+            console.log("Car data retrieved ! (offset=" + offset + ", limit=" + data_slice.length + ")");
 
-        data.forEach(function(location) {
-            //console.log(location);
-            if (location.latitude != 0 && location.longitude != 0) {
-                polyline_fullpath.addLatLng([location.latitude, location.longitude]);
+            data_slice.forEach(function(location) {
+                //console.log(location);
+                if (location.latitude != 0 && location.longitude != 0) {
+                    polyline_fullpath.addLatLng([location.latitude, location.longitude]);
+                }
+                car_data.push(location)
+            });
+
+            timestamp_slider.max = car_data.length;
+
+            mymap.fitBounds(polyline_fullpath.getBounds());
+
+            if (data.next_offset != undefined) {
+                get_data(data.next_offset);
             }
         });
-        marker = L.marker([46.690279, 2.456010]).addTo(mymap);
+    }
+    get_data(0);
 
-        mymap.fitBounds(polyline_fullpath.getBounds());
-
-        mymap.on('mousemove', function(e) {
-            //console.log("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng)
-
-        });
-    });
 
     var speed_gauge = new RadialGauge({
         renderTo: 'speed_gauge_div',
@@ -270,7 +273,7 @@
         minorTicks: 2,
         highlights: [
         ],
-        animationDuration: 100,
+        animation: false,
         borders: false,
         needleType: "arrow",
         needleWidth: 2,
@@ -293,7 +296,7 @@
             {"from": 6000, "to": 7000, "color": "rgba(255,255,0,.15)"},
             {"from": 7000, "to": 8000, "color": "rgba(255,30,0,.25)"}
         ],
-        animationDuration: 100,
+        animation: false,
         borders: false,
         needleType: "arrow",
         needleWidth: 2,

@@ -31,7 +31,7 @@
                         <tbody>
                             {% for session in sessions %}
                             <tr class="gradeX">
-                                <td><a href="{{ url_for('session_viewer_html') }}/{{ session.id }}">
+                                <td><a href="{{ url_for('session_viewer_html') }}/{{ session.uid }}">
                                         {{ session.start_date }}
                                     </a>
                                 </td>
@@ -40,10 +40,10 @@
                                         document.write(pretty_millisecondsDisplay({{ session.duration }}*1000).simple_duration);
                                     </script>
                                 </td>
-                                <td data-order="{{ session.distance }}">{{ session.distance|round(3) }} km</td>
-                                <td class="center hidden-phone">{{ session.first_address }} <br>({{ session.start_point_lat }}, {{ session.start_point_lon }})</td>
-                                <td class="center hidden-phone">{{ session.last_address }} <br>({{ session.end_point_lat }}, {{ session.end_point_lon }})</td>
-                                <td class="center hidden-phone">{{ session.nbr_events }}</td>
+                                <td data-order="{{ session.__distance }}">{{ session.distance|round(3) }} km</td>
+                                <td class="center hidden-phone">{{ session.first_address }} <br>({{ session.start_point[0] }}, {{ session.start_point[1] }})</td>
+                                <td class="center hidden-phone">{{ session.last_address }} <br>({{ session.end_point[0] }}, {{ session.end_point[1] }})</td>
+                                <td class="center hidden-phone">{{ session.car_datas|length }}</td>
                                 <td class="center hidden-phone">{{ session.status }}</td>
                                 <td class="center hidden-phone">{{ session.origin }}</td>
                                 <td class="center hidden-phone">{{ session.last_comm }}</td>
